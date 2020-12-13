@@ -5,9 +5,6 @@
 #define SHOW_FULL_TEXT 1    // не переключать режим, пока текст не покажется весь
 #define SHOW_TEXT_ONCE 1    // показывать бегущий текст только 1 раз
 
-// подключаем внешние файлы с картинками
-//#include "bitmap2.h"
-
 
 /*
    Режимы:
@@ -66,7 +63,6 @@
 
 void customModes() {
   switch (thisMode) {
-
     case 0: fillString("КРАСНЫЙ", CRGB::Red);
       break;
     case 1: fillString("РАДУГА", 1);
@@ -123,46 +119,9 @@ void customModes() {
       break;
     case 27: clockRoutine();
       break;
-
-
   }
-
 }
 
-// функция загрузки картинки в матрицу. должна быть здесь, иначе не работает =)
-void loadImage(uint16_t (*frame)[WIDTH]) {
-  for (byte i = 0; i < WIDTH; i++)
-    for (byte j = 0; j < HEIGHT; j++)
-      drawPixelXY(i, j, gammaCorrection(expandColor((pgm_read_word(&(frame[HEIGHT - j - 1][i]))))));
-  // да, тут происходит лютенький п@здец, а именно:
-  // 1) pgm_read_word - восстанавливаем из PROGMEM (флэш памяти) цвет пикселя в 16 битном формате по его координатам
-  // 2) expandColor - расширяем цвет до 24 бит (спасибо adafruit)
-  // 3) gammaCorrection - проводим коррекцию цвета для более корректного отображения
-}
-timerMinim gifTimer(D_GIF_SPEED);
-
-// ********************** ПРИМЕРЫ ВЫВОДА КАРТИНОК ***********************
-
-// Внимание! Если размер матрицы не совпадает с исходным размером матрицы в скетче
-// (если вы только что  его скачали), то нужно удалить/закомментировать данные функции!
-//
-/*
-  // показать картинку
-  void imageRoutine1() {
-  if (loadingFlag) {
-    loadingFlag = false;
-    loadImage(frame00);
-  }
-  }
-
-  void animation1() {
-  if (gifTimer.isReady()) {
-    frameNum++;
-    if (frameNum >= sizeof(framesArray)) frameNum = 0;
-    loadImage(framesArray[frameNum]);
-  }
-  }
-*/
 
 // ********************* ОСНОВНОЙ ЦИКЛ РЕЖИМОВ *******************
 #if (SMOOTH_CHANGE == 1)
@@ -235,39 +194,22 @@ void modeFader() {
 #endif
 
 boolean loadFlag2;
-void customRoutine() {
-  if (!BTcontrol) {
-    if (!gamemodeFlag) {
-      if (effectTimer.isReady()) {
-#if (OVERLAY_CLOCK == 1 && USE_CLOCK == 1)
-        if (overlayAllowed()) {
-          if (!loadingFlag && !gamemodeFlag && needUnwrap() && modeCode != 0) clockOverlayUnwrap(CLOCK_X, CLOCK_Y);
-          if (loadingFlag) loadFlag2 = true;
-        }
-#endif
-
-        customModes();                // режимы крутятся, пиксели мутятся
-
-#if (OVERLAY_CLOCK == 1 && USE_CLOCK == 1)
-        if (overlayAllowed()) {
-          if (!gamemodeFlag && modeCode != 0) clockOverlayWrap(CLOCK_X, CLOCK_Y);
-          if (loadFlag2) {
-            setOverlayColors();
-            loadFlag2 = false;
-          }
-        }
-#endif
-        loadingFlag = false;
-        FastLED.show();
-      }
-    } else {
-      customModes();
+void customRoutine() 
+{ 
+  if (!gamemodeFlag) {
+    if (effectTimer.isReady()) {
+      customModes();                // режимы крутятся, пиксели мутятся
+      loadingFlag = false;
+      FastLED.show();
     }
-    btnsModeChange();
+  } else {
+    customModes();
+  }
+  btnsModeChange();
+    
 #if (SMOOTH_CHANGE == 1)
     modeFader();
 #endif
-  }
 
   if (idleState) {
     if (fullTextFlag && SHOW_TEXT_ONCE) {
@@ -304,26 +246,6 @@ void customRoutine() {
   }
 }
 
-void timeSet(boolean type, boolean dir) {    // type: 0-часы, 1-минуты, dir: 0-уменьшить, 1-увеличить
-  if (type) {
-    if (dir) hrs++;
-    else hrs--;
-  } else {
-    if (dir) mins++;
-    else mins--;
-    if (mins > 59) {
-      mins = 0;
-      hrs++;
-    }
-    if (mins < 0) {
-      mins = 59;
-      hrs--;
-    }
-  }
-  if (hrs > 23) hrs = 0;
-  if (hrs < 0) hrs = 23;
-}
-
 void btnsModeChange() {
 #if (USE_BUTTONS == 1)
   if (bt_set.clicked()) {
@@ -345,13 +267,9 @@ void btnsModeChange() {
       clockSet = !clockSet;
       AUTOPLAY = false;
       secs = 0;
-#if (USE_CLOCK == 1)
-      if (!clockSet) rtc.adjust(DateTime(2014, 1, 21, hrs, mins, 0)); // установка нового времени в RTC
-#endif
     }
   }
 
-  // timeSet type: 0-часы, 1-минуты, dir: 0-уменьшить, 1-увеличить
 
   if (gameDemo) {
     if (bt_right.clicked()) {

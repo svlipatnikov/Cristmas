@@ -1,25 +1,9 @@
-/*
-  Скетч к проекту "Адресная матрица"
-  Гайд по постройке матрицы: https://alexgyver.ru/matrix_guide/
-  Страница проекта (схемы, описания): https://alexgyver.ru/GyverMatrixBT/
-  Подробное описание прошивки: https://alexgyver.ru/gyvermatrixos-guide/
-  Исходники на GitHub: https://github.com/AlexGyver/GyverMatrixBT/
-  Нравится, как написан код? Поддержи автора! https://alexgyver.ru/support_alex/
-  Автор: AlexGyver Technologies, 2018
-  https://AlexGyver.ru/
-*/
-
-// GyverMatrixOS
-// Версия прошивки 1.12, совместима с приложением GyverMatrixBT версии 1.12 и выше
-// 1.12 - поправлен косяк с кнопкой SET на wemos/nodemcu
-
 // ************************ МАТРИЦА *************************
-// если прошивка не лезет в Arduino NANO - отключай режимы! Строка 60 и ниже
 
 #define BRIGHTNESS 150        // стандартная маскимальная яркость (0-255)
-#define CURRENT_LIMIT 2000    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
+#define CURRENT_LIMIT 1500    // лимит по току в миллиамперах, автоматически управляет яркостью (пожалей свой блок питания!) 0 - выключить лимит
 
-#define WIDTH 5               // ширина матрицы
+#define WIDTH 10              // ширина матрицы
 #define HEIGHT 10             // высота матрицы
 #define SEGMENTS 1            // диодов в одном "пикселе" (для создания матрицы из кусков ленты)
 
@@ -30,22 +14,22 @@
 #define STRIP_DIRECTION 1     // направление ленты из угла: 0 - вправо, 1 - вверх, 2 - влево, 3 - вниз
 // при неправильной настрйоке матрицы вы получите предупреждение "Wrong matrix parameters! Set to default"
 // шпаргалка по настройке матрицы здесь! https://alexgyver.ru/matrix_guide/
-
+/*
 #define MCU_TYPE 1            // микроконтроллер: 
 //                            0 - AVR (Arduino NANO/MEGA/UNO)
 //                            1 - ESP8266 (NodeMCU, Wemos D1)
 //                            2 - STM32 (Blue Pill)
-
+*/
 // ******************** ЭФФЕКТЫ И РЕЖИМЫ ********************
-#define D_TEXT_SPEED 100      // скорость бегущего текста по умолчанию (мс)
+#define D_TEXT_SPEED 150      // скорость бегущего текста по умолчанию (мс)
 #define D_EFFECT_SPEED 80     // скорость эффектов по умолчанию (мс)
 #define D_GAME_SPEED 250      // скорость игр по умолчанию (мс)
 #define D_GIF_SPEED 80        // скорость гифок (мс)
-#define DEMO_GAME_SPEED 60    // скорость игр в демо режиме (мс)
+#define DEMO_GAME_SPEED 120   // скорость игр в демо режиме (мс)
 
 boolean AUTOPLAY = 1;         // 0 выкл / 1 вкл автоматическую смену режимов (откл. можно со смартфона)
 int AUTOPLAY_PERIOD = 10;     // время между авто сменой режимов (секунды)
-#define IDLE_TIME 10          // время бездействия кнопок или Bluetooth (в секундах) после которого запускается автосмена режимов и демо в играх
+#define IDLE_TIME 60          // время бездействия кнопок или Bluetooth (в секундах) после которого запускается автосмена режимов и демо в играх
 
 // о поддерживаемых цветах читай тут https://alexgyver.ru/gyvermatrixos-guide/
 #define GLOBAL_COLOR_1 CRGB::Green    // основной цвет №1 для игр
@@ -73,34 +57,7 @@ int AUTOPLAY_PERIOD = 10;     // время между авто сменой р�
 #define USE_ARKAN 1           // игра арканоид
 
 // ****************** ПИНЫ ПОДКЛЮЧЕНИЯ *******************
-// Arduino (Nano, Mega)
-#if (MCU_TYPE == 0)
-#define LED_PIN 6           // пин ленты
-#define BUTT_UP 3           // кнопка вверх
-#define BUTT_DOWN 5         // кнопка вниз
-#define BUTT_LEFT 2         // кнопка влево
-#define BUTT_RIGHT 4        // кнопка вправо
-#define BUTT_SET 7          // кнопка выбор/игра
-
-// пины подписаны согласно pinout платы, а не надписям на пинах!
-// esp8266 - плату выбирал Wemos D1 R1
-#elif (MCU_TYPE == 1)
-#define LED_PIN 2           // пин ленты
-#define BUTT_UP 14          // кнопка вверх
-#define BUTT_DOWN 13        // кнопка вниз
-#define BUTT_LEFT 0         // кнопка влево
-#define BUTT_RIGHT 12       // кнопка вправо
-#define BUTT_SET 1         // кнопка выбор/игра
-
-// STM32 (BluePill) - плату выбирал STM32F103C
-#elif (MCU_TYPE == 2)
-#define LED_PIN PB12         // пин ленты
-#define BUTT_UP PA1          // кнопка вверх
-#define BUTT_DOWN PA3        // кнопка вниз
-#define BUTT_LEFT PA0        // кнопка влево
-#define BUTT_RIGHT PA2       // кнопка вправо
-#define BUTT_SET PA4         // кнопка выбор/игра
-#endif
+#define LED_PIN 0           // пин ленты
 
 // ******************************** ДЛЯ РАЗРАБОТЧИКОВ ********************************
 #define DEBUG 0
@@ -129,15 +86,11 @@ int AUTOPLAY_PERIOD = 10;     // время между авто сменой р�
 #define FIRE_ROUTINE 20
 #define IMAGE_MODE 21
 
-#if (MCU_TYPE == 1)
 #define FASTLED_INTERRUPT_RETRY_COUNT 0
 #define FASTLED_ALLOW_INTERRUPTS 0
-#include <ESP8266WiFi.h>
-#endif
 
 #include "FastLED.h"
 CRGB leds[NUM_LEDS];
-String runningText = "";
 
 static const byte maxDim = max(WIDTH, HEIGHT);
 byte buttons = 4;   // 0 - верх, 1 - право, 2 - низ, 3 - лево, 4 - не нажата
@@ -177,33 +130,40 @@ timerMinim idleTimer((long)IDLE_TIME * 1000);
 timerMinim changeTimer(70);
 timerMinim halfsecTimer(500);
 
-#if (USE_CLOCK == 1 && (MCU_TYPE == 0 || MCU_TYPE == 1))
-#include <Wire.h>
-#include "RTClib.h"
+#include <ESP8266WiFi.h>
+char *ssid = "welcome's wi-fi";
+char *pass = "27101988";
+const bool NEED_STATIC_IP = true;
+IPAddress gateway (192, 168, 1, 1);
+IPAddress mask (255, 255, 255, 255);
+IPAddress IP_Cristmas(192, 168, 1, 83);
 
-RTC_DS3231 rtc;
-// RTC_DS1307 rtc;
-#endif
+#include <PubSubClient.h>
+WiFiClient ESP_climate;
+PubSubClient client(ESP_climate);
+const char *mqtt_client_name = "ESP8266_cristmas";   // Имя клиента
+
+#include <ESP8266HTTPUpdateServer.h>
+ESP8266WebServer httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
+
+// константы
+const int RESTART_PERIOD = 10 * 60 * 1000;    // минимально время до ребута, если не удается подключиться к wi-fi
+const int     CHECK_PERIOD = 5 * 60 * 1000;   // периодичность проверки на подключение к сервисам
+
+// переменные времени
+unsigned long Last_online_time;               // время когда модуль был онлайн
+unsigned long Last_check_time;                // время крайней проверки подключения к сервисам
+
+//===================================================================================================
 
 void setup() {
-#if (BT_MODE == 1)
-  Serial.begin(9600);
-#endif
+  // подключение к Wi-Fi
+  Connect_WiFi(IP_Cristmas, NEED_STATIC_IP);
 
-#if (MCU_TYPE == 1)
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-#endif
-
-#if (USE_CLOCK == 1 && (MCU_TYPE == 0 || MCU_TYPE == 1))
-  rtc.begin();
-  if (rtc.lostPower()) {
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
-  DateTime now = rtc.now();
-  secs = now.second();
-  mins = now.minute();
-  hrs = now.hour();
-#endif
+  // подключение к MQTT
+  Connect_mqtt(mqtt_client_name);
+  MQTT_subscribe();
 
   // настройки ленты
   FastLED.addLeds<WS2812, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
@@ -214,7 +174,30 @@ void setup() {
   randomSeed(analogRead(0) + analogRead(1));    // пинаем генератор случайных чисел
 }
 
+//===================================================================================================
+
 void loop() {
+  // основные функции
   customRoutine();
-  //bluetoothRoutine();
+
+  // сетевые функции
+  httpServer.handleClient(); // для обновления по воздуху
+  client.loop();             // для функций MQTT
+  
+  // проверка подключения к wifi
+  if ((long)millis() - Last_check_time > CHECK_PERIOD) {
+    Last_check_time = millis();
+
+    if (WiFi.status() != WL_CONNECTED) { // wi-fi
+      Connect_WiFi(IP_Cristmas, NEED_STATIC_IP);
+      Restart(Last_online_time, RESTART_PERIOD);
+    }
+    else
+      Last_online_time = millis();
+
+    if (!client.connected()) { // mqtt
+      Connect_mqtt(mqtt_client_name);
+      MQTT_subscribe();
+    }
+  }
 }

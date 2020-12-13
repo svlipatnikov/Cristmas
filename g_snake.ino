@@ -7,7 +7,7 @@
 // **************** ДЛЯ РАЗРАБОТЧИКОВ ****************
 int8_t vectorX, vectorY;
 int8_t headX, headY, buttX, buttY;
-int8_t appleX, appleY;****
+int8_t appleX, appleY;
 boolean apple_flag, missDelete = false;
 
 int8_t buttVector[MAX_LENGTH];
