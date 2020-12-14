@@ -1,3 +1,5 @@
+byte mqttButtons = 0;
+
 // подключение к MQTT 
 const char *mqtt_server = "mqtt.dioty.co";          // Имя сервера MQTT
 const int   mqtt_port = 1883;                       // Порт для подключения к серверу MQTT
@@ -60,8 +62,8 @@ void mqtt_get(char* topic, byte* payload, unsigned int length) {
   }
   else if (strcmp(topic, topic_buttons) == 0) {
     int ivalue = 0; sscanf(localPayload, "%d", &ivalue);
-    buttons = (int)ivalue; 
-    MQTT_publish_int(topic_buttons_state, buttons); 
+    mqttButtons = (int)ivalue; 
+    MQTT_publish_int(topic_buttons_state, mqttButtons); 
     controlFlag = true;   
   }
 }

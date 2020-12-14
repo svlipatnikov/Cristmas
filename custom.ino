@@ -117,8 +117,8 @@ void customModes() {
       break;
     case 26: arkanoidRoutine();
       break;
-    case 27: clockRoutine();
-      break;
+    //case 27: clockRoutine();
+    //  break;
   }
 }
 
@@ -205,6 +205,7 @@ void customRoutine()
   } else {
     customModes();
   }
+  
   btnsModeChange();
     
 #if (SMOOTH_CHANGE == 1)
@@ -246,9 +247,17 @@ void customRoutine()
   }
 }
 
+bool mqttBtnUp, mqttBtnDown, mqttBtnLeft, mqttBtnRight, mqttBtnSet;
+
 void btnsModeChange() {
-#if (USE_BUTTONS == 1)
-  if (bt_set.clicked()) {
+
+  (mqttButtons == 4) ? mqttBtnUp = true    : mqttBtnUp = false;
+  (mqttButtons == 1) ? mqttBtnRight = true : mqttBtnRight = false;
+  (mqttButtons == 2) ? mqttBtnDown = true  : mqttBtnDown = false;
+  (mqttButtons == 3) ? mqttBtnLeft = true  : mqttBtnLeft = false;
+  (mqttButtons == 5) ? mqttBtnSet = true   : mqttBtnSet = false;
+
+  if (mqttBtnSet) {
     if (gamemodeFlag) gameDemo = !gameDemo;
     if (gameDemo) {
       gameSpeed = DEMO_GAME_SPEED;
@@ -260,7 +269,7 @@ void btnsModeChange() {
       AUTOPLAY = false;
     }
   }
-  if (bt_set.holded()) {
+ /* if (bt_set.holded()) {
     if (modeCode == 2)
       mazeMode = !mazeMode;
     if (modeCode == 1) {    // вход в настройку часов
@@ -268,45 +277,30 @@ void btnsModeChange() {
       AUTOPLAY = false;
       secs = 0;
     }
-  }
+  }*/
 
 
   if (gameDemo) {
-    if (bt_right.clicked()) {
-      if (!clockSet) {
-        autoplayTimer = millis();
-        nextMode();
-      } else {
-        timeSet(1, 1);
-      }
+    if (mqttBtnRight) {
+      autoplayTimer = millis();
+      nextMode();
     }
 
-    if (bt_left.clicked()) {
-      if (!clockSet) {
-        autoplayTimer = millis();
-        prevMode();
-      } else {
-        timeSet(1, 0);
-      }
+    if (mqttBtnLeft) {
+      autoplayTimer = millis();
+      prevMode();
     }
 
-    if (bt_up.clicked()) {
-      if (!clockSet) {
-        AUTOPLAY = true;
-        autoplayTimer = millis();
-      } else {
-        timeSet(0, 1);
-      }
+    if (mqttBtnUp) {
+      AUTOPLAY = true;
+      autoplayTimer = millis();
     }
-    if (bt_down.clicked()) {
-      if (!clockSet) {
-        AUTOPLAY = false;
-      } else {
-        timeSet(0, 0);
-      }
+    
+    if (mqttBtnDown) {
+      AUTOPLAY = false;
     }
 
-    if (bt_right.holding())
+   /* if (bt_right.holding())
       if (changeTimer.isReady()) {
         if (!clockSet) {
           effects_speed -= 2;
@@ -347,7 +341,7 @@ void btnsModeChange() {
         } else {
           timeSet(0, 0);
         }
-      }
+      }*/
   }
-#endif
+
 }
