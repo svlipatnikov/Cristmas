@@ -147,6 +147,7 @@ static void prevMode() {
 }
 void nextModeHandler() {
   thisMode++;
+  MQTT_publish_int(topic_mode_state, thisMode); 
   if (thisMode >= MODES_AMOUNT) thisMode = 0;
   loadingFlag = true;
   gamemodeFlag = false;
@@ -155,6 +156,7 @@ void nextModeHandler() {
 }
 void prevModeHandler() {
   thisMode--;
+  MQTT_publish_int(topic_mode_state, thisMode); 
   if (thisMode < 0) thisMode = MODES_AMOUNT - 1;
   loadingFlag = true;
   gamemodeFlag = false;
